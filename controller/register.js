@@ -78,6 +78,7 @@ const register = async (req, res) =>{
             message: "Address is required."
         })
     } 
+
     
                                             // gender part
     
