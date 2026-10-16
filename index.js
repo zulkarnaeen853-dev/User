@@ -12,16 +12,8 @@ app.use(cors());
 app.use(express.json());
 app.use(router);
 
-async function startServer() {
-  try {
-    await database()
-    app.listen(port, () => {
-      console.log(`Server is listening on port ${port}`)
-    })
-  } catch (error) {
-    console.error('Unable to start server:', error.message)
-    process.exit(1)
-  }
-}
+database()
 
-startServer()
+app.listen(port, ()=>{
+    console.log(`Server is running on port ${port}`)
+})

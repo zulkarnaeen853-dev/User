@@ -6,10 +6,9 @@ const User = new Schema(
     {
     name: {
       type: String,
-      required: [true, 'Username is required'],
+      required: [true, 'Name is required'],
       unique: true,
       trim: true,
-      minlength: [3, 'Username must be at least 3 characters long'],
     },
     email: {
       type: String,
@@ -17,15 +16,10 @@ const User = new Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        'Please enter a valid email address',
-      ],
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters long'],
       select: false, 
     },
     profilePic: {
@@ -34,7 +28,7 @@ const User = new Schema(
     },
     gender: {
       type: String,
-      enum: ['male', 'female', 'other', 'prefer not to say'],
+      enum: ['male', 'female', 'non-binary', 'other', 'prefer not to say'],
       default: 'prefer not to say',
     },
     phone: {
@@ -43,14 +37,16 @@ const User = new Schema(
       match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number'],
     },
     address: {
-      street: { type: String, trim: true },
-      city: { type: String, trim: true },
-      state: { type: String, trim: true },
-      zipCode: { type: String, trim: true },
-      country: { type: String, trim: true },
+      type: String,
+      trim: true,
     },
     dateOfBirth: {
-      type: Date,
+      type: String,
+      trim: true,
+      match: [
+        /^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[0-2])[- /.](19|20)\d{2}$/,
+        'Birth date must use DD-MM-YYYY format',
+      ],
     },
     isVerified: {
       type: Boolean,
@@ -63,5 +59,4 @@ const User = new Schema(
 )
 
 module.exports = mongoose.model('User', User);
-
 
