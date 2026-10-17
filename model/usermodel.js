@@ -7,7 +7,6 @@ const User = new Schema(
     name: {
       type: String,
       required: [true, 'Name is required'],
-      unique: true,
       trim: true,
     },
     email: {
@@ -59,4 +58,3 @@ const User = new Schema(
 )
 
 module.exports = mongoose.model('User', User);
-

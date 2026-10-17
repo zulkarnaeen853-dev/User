@@ -119,7 +119,7 @@ const register = async (req, res) =>{
         })
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = await bcrypt.hashSync(password, 10);
 
     const RegisteredUser = await new User({
         name, 
@@ -138,7 +138,8 @@ const register = async (req, res) =>{
             message: "User registered successfully.",
             data: {
                 name,
-                email
+                email,
+                password: hashedPassword
             }
         });
 
