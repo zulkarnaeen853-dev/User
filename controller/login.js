@@ -1,46 +1,53 @@
-const User = require('../model/usermodel')
 const bcrypt = require('bcrypt')
+const User = require('../model/usermodel')
+const { publicUser } = require('../utils/tokenHelper')
+const { issueAuthTokens } = require('../utils/issueTokens')
 
 const login = async (req, res) => {
-    try {
+  try {
+    const { email, password } = req.body
+    const user = await User.findOne({ email }).select('+password')
 
-        const { email, password } = req.body
-        const existedEmail = await User.findOne({ email }).select('+password')
-
-        // 3. Properly check if the user exists
-        if (!existedEmail) {
-            return res.send({
-                success: false,
-                message: "Email does not exist."
-            })
-        }
-
-        
-        const isPasswordCorrect = await bcrypt.compare(password, existedEmail.password)
-
-        if (!isPasswordCorrect) {
-            return res.send({
-                success: false,
-                message: "Wrong Password."
-            })
-        }
-
-        res.send({
-            success: true,
-            message: "User logged in successfully.",
-            data: {
-                id: existedEmail._id,
-                name: existedEmail.name,
-                email: existedEmail.email
-            }
-        })
-
-    } catch (error) {
-        res.status(500).send({
-            success: false,
-            message: "Something went wrong on the server."
-        })
+    if (!user) {
+      return res.status(401).send({
+        success: false,
+        message: 'Invalid email or password.',
+      })
     }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+    if (!isPasswordCorrect) {
+      return res.status(401).send({
+        success: false,
+        message: 'Invalid email or password.',
+      })
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).send({
+        success: false,
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Please verify your email before signing in.',
+      })
+    }
+
+    const tokens = await issueAuthTokens(res, user)
+
+    return res.send({
+      success: true,
+      message: 'User logged in successfully.',
+      data: {
+        user: publicUser(user),
+        ...tokens,
+      },
+    })
+  } catch (error) {
+    console.error('login error:', error)
+    return res.status(500).send({
+      success: false,
+      message: 'Something went wrong on the server.',
+    })
+  }
 }
 
 module.exports = login
