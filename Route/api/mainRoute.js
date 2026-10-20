@@ -1,15 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const register = require('../../controller/register')
-const login = require('../../controller/login')
-const logout = require('../../controller/logout')
-const refresh = require('../../controller/refresh')
-const verifyEmail = require('../../controller/verifyEmail')
-const resendVerification = require('../../controller/resendVerification')
-const forgotPassword = require('../../controller/forgotPassword')
-const resetPassword = require('../../controller/resetPassword')
-const me = require('../../controller/me')
+const authController = require('../../controller/authController')
 const {
   RegisterMiddleware,
   LoginMiddleware,
@@ -19,15 +11,32 @@ const {
   optionalProtect,
 } = require('../../middleware/authmiddleware')
 
-router.post('/register', RegisterMiddleware, register)
-router.post('/login', LoginMiddleware, login)
-router.post('/logout', optionalProtect, logout)
-router.post('/refresh', refresh)
-router.get('/verify-email', verifyEmail)
-router.post('/verify-email', verifyEmail)
-router.post('/resend-verification', EmailMiddleware, resendVerification)
-router.post('/forgot-password', EmailMiddleware, forgotPassword)
-router.post('/reset-password', ResetPasswordMiddleware, resetPassword)
-router.get('/me', protect, me)
+router.post('/registration', RegisterMiddleware, authController.registrationController)
+router.post('/register', RegisterMiddleware, authController.registrationController)
+router.post('/login', LoginMiddleware, authController.loginController)
+
+router.get('/verify-email', authController.verifyEmailController)
+router.post('/verify-email', authController.verifyEmailController)
+router.get('/verify-email/:token', authController.verifyEmailController)
+
+router.post('/resend-verification', EmailMiddleware, authController.resendVerificationController)
+router.post('/refresh', authController.refreshTokenController)
+router.post('/refresh-token', authController.refreshTokenController)
+router.post('/logout', optionalProtect, authController.logoutController)
+
+router.post('/forgot-password', EmailMiddleware, authController.forgotPasswordController)
+router.post('/reset-password', ResetPasswordMiddleware, authController.resetPasswordController)
+router.post(
+  '/reset-password/:token',
+  (req, res, next) => {
+    req.body.token = req.params.token
+    next()
+  },
+  ResetPasswordMiddleware,
+  authController.resetPasswordController,
+)
+
+router.get('/me', protect, authController.getMeController)
+
 
 module.exports = router
